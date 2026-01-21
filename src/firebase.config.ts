@@ -1,6 +1,5 @@
-
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import * as firebaseAuth from 'firebase/auth';
 import { getFirestore, enableIndexedDbPersistence } from 'firebase/firestore';
 
 export const firebaseConfig = {
@@ -17,7 +16,7 @@ export const firebaseConfig = {
 export const isConfigured = firebaseConfig.apiKey !== "REPLACE_WITH_YOUR_API_KEY" && firebaseConfig.apiKey !== "";
 
 export const app = initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+export const auth = firebaseAuth.getAuth(app);
 export const db = getFirestore(app);
 
 // Enable offline persistence

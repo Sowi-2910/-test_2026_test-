@@ -1,14 +1,6 @@
-
 import { Injectable, signal } from '@angular/core';
-import { 
-  onAuthStateChanged, 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signOut,
-  User 
-} from 'firebase/auth';
+import * as firebaseAuth from 'firebase/auth';
+import type { User } from 'firebase/auth';
 import { auth, isConfigured } from '../firebase.config';
 
 @Injectable({
@@ -27,7 +19,7 @@ export class AuthService {
       return;
     }
 
-    onAuthStateChanged(auth, (user) => {
+    firebaseAuth.onAuthStateChanged(auth, (user) => {
       this.currentUser.set(user);
       this.isLoading.set(false);
     }, (err) => {
@@ -42,7 +34,7 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await createUserWithEmailAndPassword(auth, email, pass);
+      await firebaseAuth.createUserWithEmailAndPassword(auth, email, pass);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -56,7 +48,7 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await signInWithEmailAndPassword(auth, email, pass);
+      await firebaseAuth.signInWithEmailAndPassword(auth, email, pass);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -70,8 +62,8 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const provider = new GoogleAuthProvider();
-      await signInWithPopup(auth, provider);
+      const provider = new firebaseAuth.GoogleAuthProvider();
+      await firebaseAuth.signInWithPopup(auth, provider);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -81,7 +73,7 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    await signOut(auth);
+    await firebaseAuth.signOut(auth);
     this.currentUser.set(null);
   }
 
