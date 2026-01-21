@@ -1,6 +1,14 @@
 
 import { Injectable, signal } from '@angular/core';
-import * as firebaseAuth from 'firebase/auth';
+import { 
+  onAuthStateChanged, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut,
+  User 
+} from 'firebase/auth';
 import { auth, isConfigured } from '../firebase.config';
 
 @Injectable({
@@ -8,8 +16,7 @@ import { auth, isConfigured } from '../firebase.config';
 })
 export class AuthService {
   // Signals for reactive state
-  // Infer the User type from the auth instance to avoid import errors
-  currentUser = signal<typeof auth.currentUser>(null);
+  currentUser = signal<User | null>(null);
   isLoading = signal<boolean>(true);
   error = signal<string | null>(null);
 
@@ -20,7 +27,7 @@ export class AuthService {
       return;
     }
 
-    firebaseAuth.onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
       this.currentUser.set(user);
       this.isLoading.set(false);
     }, (err) => {
@@ -35,7 +42,7 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await firebaseAuth.createUserWithEmailAndPassword(auth, email, pass);
+      await createUserWithEmailAndPassword(auth, email, pass);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -49,7 +56,7 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await firebaseAuth.signInWithEmailAndPassword(auth, email, pass);
+      await signInWithEmailAndPassword(auth, email, pass);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -63,8 +70,8 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const provider = new firebaseAuth.GoogleAuthProvider();
-      await firebaseAuth.signInWithPopup(auth, provider);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -74,7 +81,7 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    await firebaseAuth.signOut(auth);
+    await signOut(auth);
     this.currentUser.set(null);
   }
 

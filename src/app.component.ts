@@ -8,7 +8,6 @@ import { isConfigured } from './firebase.config';
 
 @Component({
   selector: 'app-root',
-  standalone: true,
   imports: [CommonModule, LoginComponent, DashboardComponent],
   template: `
     @if (!isConfigured) {
