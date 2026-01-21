@@ -11,7 +11,6 @@ import {
 import { db } from '../firebase.config';
 import { AuthService } from './auth.service';
 
-// --- Daily Cash Interfaces ---
 export interface CajaDiaria {
   id?: string;
   usuarioId?: string;
@@ -35,7 +34,6 @@ export interface CajaDiaria {
   };
 }
 
-// --- Main Cash Interfaces (Caja Principal) ---
 export interface Abono {
   id: number;
   date: string;
@@ -44,7 +42,7 @@ export interface Abono {
 }
 
 export interface Habitacion {
-  id: string; // Room Number (e.g. "101")
+  id: string;
   piso: string;
   estado: 'active' | 'inactive';
   costo: number;
@@ -67,7 +65,6 @@ export interface BancoMovimiento {
   monto: number;
 }
 
-// Combined state for Main Cash persistence
 export interface MainCashState {
   abonos: Abono[];
   habitaciones: Habitacion[];
@@ -82,7 +79,6 @@ export interface MainCashState {
 export class DataService {
   private authService = inject(AuthService);
   
-  // Save Daily Cash Snapshot (Append only)
   async saveCajaDiaria(data: CajaDiaria) {
     const user = this.authService.currentUser();
     if (!user) throw new Error('No user logged in');
@@ -94,13 +90,10 @@ export class DataService {
     });
   }
 
-  // Save Main Cash State (Overwrite/Update current state for persistence)
-  // We use a specific document ID 'current_state' for simplicity in this architecture
   async saveMainCashState(data: MainCashState) {
     const user = this.authService.currentUser();
     if (!user) throw new Error('No user logged in');
 
-    // We store this in a subcollection for the user so it's private
     const docRef = doc(db, `users/${user.uid}/main_cash/current`);
     await setDoc(docRef, {
       ...data,
@@ -108,7 +101,6 @@ export class DataService {
     });
   }
 
-  // Load Main Cash State
   async loadMainCashState(): Promise<MainCashState | null> {
     const user = this.authService.currentUser();
     if (!user) return null;
@@ -124,12 +116,10 @@ export class DataService {
       return null;
     } catch (error: any) {
       // Handle Firestore offline error gracefully
-      // Code 'unavailable' or message 'client is offline'
       if (error.code === 'unavailable' || error.message?.includes('offline')) {
         console.warn('Network unavailable and no local cache found. Starting with empty state.');
         return null;
       }
-      // Re-throw other errors (permission denied, etc)
       throw error;
     }
   }

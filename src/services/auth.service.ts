@@ -1,6 +1,13 @@
-
 import { Injectable, signal } from '@angular/core';
-import * as firebaseAuth from 'firebase/auth';
+import { 
+  User, 
+  onAuthStateChanged, 
+  createUserWithEmailAndPassword, 
+  signInWithEmailAndPassword, 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  signOut 
+} from 'firebase/auth';
 import { auth, isConfigured } from '../firebase.config';
 
 @Injectable({
@@ -8,20 +15,18 @@ import { auth, isConfigured } from '../firebase.config';
 })
 export class AuthService {
   // Signals for reactive state
-  currentUser = signal<firebaseAuth.User | null>(null);
+  currentUser = signal<User | null>(null);
   isLoading = signal<boolean>(true);
   error = signal<string | null>(null);
 
   constructor() {
-    // If config is missing, stop here to avoid console errors
     if (!isConfigured) {
       this.isLoading.set(false);
       this.error.set("Falta configuración de Firebase");
       return;
     }
 
-    // Listen to auth state changes
-    firebaseAuth.onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, (user) => {
       this.currentUser.set(user);
       this.isLoading.set(false);
     }, (err) => {
@@ -36,7 +41,7 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await firebaseAuth.createUserWithEmailAndPassword(auth, email, pass);
+      await createUserWithEmailAndPassword(auth, email, pass);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -50,7 +55,7 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      await firebaseAuth.signInWithEmailAndPassword(auth, email, pass);
+      await signInWithEmailAndPassword(auth, email, pass);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -64,8 +69,8 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
     try {
-      const provider = new firebaseAuth.GoogleAuthProvider();
-      await firebaseAuth.signInWithPopup(auth, provider);
+      const provider = new GoogleAuthProvider();
+      await signInWithPopup(auth, provider);
     } catch (e: any) {
       this.error.set(this.mapError(e.code));
       throw e;
@@ -75,7 +80,7 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    await firebaseAuth.signOut(auth);
+    await signOut(auth);
     this.currentUser.set(null);
   }
 
