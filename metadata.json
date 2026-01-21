@@ -1,0 +1,5 @@
+{
+  "name": "Firebase Registro Master",
+  "description": "A professional, responsive Angular application for tracking personal or administrative records with Firebase Authentication and Firestore CRUD.",
+  "requestFramePermissions": []
+}
