@@ -114,11 +114,23 @@ export class DataService {
     if (!user) return null;
 
     const docRef = doc(db, `users/${user.uid}/main_cash/current`);
-    const snapshot = await getDoc(docRef);
     
-    if (snapshot.exists()) {
-      return snapshot.data() as MainCashState;
+    try {
+      const snapshot = await getDoc(docRef);
+      
+      if (snapshot.exists()) {
+        return snapshot.data() as MainCashState;
+      }
+      return null;
+    } catch (error: any) {
+      // Handle Firestore offline error gracefully
+      // Code 'unavailable' or message 'client is offline'
+      if (error.code === 'unavailable' || error.message?.includes('offline')) {
+        console.warn('Network unavailable and no local cache found. Starting with empty state.');
+        return null;
+      }
+      // Re-throw other errors (permission denied, etc)
+      throw error;
     }
-    return null;
   }
 }
